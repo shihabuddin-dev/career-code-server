@@ -39,9 +39,16 @@ async function run() {
       const result = await jobsCollection.findOne(filter);
       res.send(result);
     });
+    // adding jobs from client site
+    app.post('/jobs',  async (req,res)=>{
+      const jobData= req.body;
+      const result= await jobsCollection.insertOne(jobData)
+      res.send(result)
+    })
+
 
     // **applications**
-    //
+    //get single application using id
     app.get("/applications/:id", async (req, res) => {
       const id = req.params.id;
       const find = { _id: new ObjectId(id) };

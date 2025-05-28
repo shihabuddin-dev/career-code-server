@@ -41,6 +41,13 @@ async function run() {
     });
 
     // **applications**
+    //
+    app.get("/applications/:id", async (req, res) => {
+      const id = req.params.id;
+      const find = { _id: new ObjectId(id) };
+      const result = await applicationsCollection.findOne(find);
+      res.send(result);
+    });
     // get application data by email (data loading by using query)
     app.get("/applications", async (req, res) => {
       const email = req.query.email;
@@ -62,6 +69,14 @@ async function run() {
     app.post("/applications", async (req, res) => {
       const application = req.body;
       const result = await applicationsCollection.insertOne(application);
+      res.send(result);
+    });
+
+    // delete applications
+    app.delete("/applications/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await applicationsCollection.deleteOne(filter);
       res.send(result);
     });
 

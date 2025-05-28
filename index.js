@@ -29,7 +29,14 @@ async function run() {
       .collection("applications");
 
     app.get("/jobs", async (req, res) => {
-      const result = await jobsCollection.find().toArray();
+      // getting posted jobs using email
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.hr_email = email;
+      }
+
+      const result = await jobsCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -40,21 +47,14 @@ async function run() {
       res.send(result);
     });
     // adding jobs from client site
-    app.post('/jobs',  async (req,res)=>{
-      const jobData= req.body;
-      const result= await jobsCollection.insertOne(jobData)
-      res.send(result)
-    })
-
-
-    // **applications**
-    //get single application using id
-    app.get("/applications/:id", async (req, res) => {
-      const id = req.params.id;
-      const find = { _id: new ObjectId(id) };
-      const result = await applicationsCollection.findOne(find);
+    app.post("/jobs", async (req, res) => {
+      const jobData = req.body;
+      const result = await jobsCollection.insertOne(jobData);
       res.send(result);
     });
+
+    // **applications**
+
     // get application data by email (data loading by using query)
     app.get("/applications", async (req, res) => {
       const email = req.query.email;
@@ -70,6 +70,14 @@ async function run() {
         application.title = job.title;
         application.company_logo = job.company_logo;
       }
+      res.send(result);
+    });
+
+    //get single application using id
+    app.get("/applications/job/:job_id", async (req, res) => {
+      const job_id = req.params.job_id;
+      const query = { jobId: job_id };
+      const result =await applicationsCollection.find(query).toArray()
       res.send(result);
     });
     // applicationsCollection post from client site

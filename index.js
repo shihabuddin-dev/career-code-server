@@ -1,9 +1,10 @@
 const express = require("express");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // Middleware
 app.use(cors());
@@ -28,6 +29,15 @@ async function run() {
       .db("careerCodeDB")
       .collection("applications");
 
+    // jwt token related api
+    app.post("/jwt", async (req, res) => {
+      const { email } = req.body;
+      const user = { email };
+      const token = jwt.sign(user, "secret", { expiresIn: "1h" });
+      res.send({ token });
+    });
+
+    // jobs api
     app.get("/jobs", async (req, res) => {
       // getting posted jobs using email
       const email = req.query.email;

@@ -18,6 +18,15 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// firebase
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./firebase-admin-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 const logger = (req, res, next) => {
   console.log("inside the logger middleware");
   next();
@@ -37,6 +46,18 @@ const verifyToken = (req, res, next) => {
     req.decoded = decoded;
     next();
   });
+};
+
+// verify firebase token
+const verifyFirebaseToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader.split(" ")[1];
+  if (token) {
+    return res.status(401).send({ message: "unAuthorized access" });
+  }
+  const userInfo = await admin.auth().verifyIdToken(token);
+  req.tokenEmail = userInfo.email;
+  next();
 };
 
 // mongoDB
@@ -116,12 +137,11 @@ async function run() {
     });
 
     // **applications**
-
     // get application data by email (data loading by using query)
-    app.get("/applications", logger, verifyToken, async (req, res) => {
+    app.get("/applications", logger, verifyFirebaseToken, async (req, res) => {
       const email = req.query.email;
-      // console.log("inside application api", req.cookies);
-      if (email !== req.decoded.email) {
+
+      if (req.tokenEmail !== email) {
         return res.status(403).send({ message: "forbidden access" });
       }
       const query = { applicant: email };

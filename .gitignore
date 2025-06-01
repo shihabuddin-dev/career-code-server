@@ -1,4 +1,9 @@
 node_modules
 .env
 .vercel
-firebase-admin-key.json
+firebase-admin-service-key.json
+.vscode
+.DS_Store
+dist
+# Logs
+logs    
